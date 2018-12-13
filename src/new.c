@@ -5,11 +5,34 @@ extern const void * string;
 //////// Garbage Collection ////////
 struct object_node {
   void * object;
+  // int reference_count;
   struct object_node * next;
 };
 static struct object_node * _nodes = NULL;
 static void push_node(const void * _object);
 static void pop_node();
+static struct object_node * find_node(void * _object);
+// static void remove_node(struct object_node * _node);
+
+// bind(str, new(string, "a string"));
+// bind(str1, str);
+// #define bind(name, obj)\
+//   void * name = obj;\
+//   {\
+//     struct object_node * n = find_node(name);\
+//     if (!n) { push_node(name); runtime_objects->reference_count++; }\
+//     else { n->reference_count++; }\
+//   }
+
+// #define unbind(name)\
+//   {\
+//     struct object_node * n = find_node(name);\
+//     if (!n) { name = NULL; }\
+//     else {\
+//       n->reference_count--;\
+//       if (n->reference_count <= 0) { delete(n->object); remove_node(n); }\
+//     }\
+//   }
 
 // Create a new instace.
 //// WILL throw an error if failed to allocate memory.
@@ -148,17 +171,24 @@ int is_instance(const void * _self, const void * _class) {
 // Returns whether a class has implemented the given interface.
 //// WILL throw an error when the first argument is NULL.
 int implemented(const void * _class, const int interface) {
-  const Class * class = _class;
+  return get_interface(_class, interface) ? 1 : 0;
+}
 
-  if (!_class)
+// Returns the specific interface object when the class has implemented the given interface.
+//// WILL throw an error when the first argument is NULL.
+void * get_interface(const void * _class, const int interface) {
+  const Class * const * class = _class;
+
+  if (!_class || !(*class))
     error(ERR_NULLREF);
 
-  for (Interface * p = class->interfaces; p != NULL; p = p->next) {
+  Interface * p = (*class)->interfaces;
+  for (; p != NULL; p = p->next) {
     if (* (int *)(p->interface) == interface) {
-      return 1;
+      return p->interface;
     }
   }
-  return 0;
+  return NULL;
 }
 
 

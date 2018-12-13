@@ -26,7 +26,7 @@
 
 typedef struct Interface {
   void * interface;
-  struct Interfaces * next;
+  struct Interface * next;
 } Interface;
 
 typedef struct Class {
@@ -89,7 +89,7 @@ int implemented(const void * _class, const int interface) _THROWS;
 
 // Returns the specific interface object when the class has implemented the given interface.
 //// WILL throw an error when the first argument is NULL.
-void * get_interface(const void * _class, const void * interface) _THROWS;
+void * get_interface(const void * _class, const int interface) _THROWS;
 
 
 //////// Garbage Collection ////////

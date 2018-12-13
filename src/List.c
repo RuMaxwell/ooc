@@ -41,3 +41,5 @@ static int List_differ(const void * _self, const void * _other) {
 static void * List_to_string_helper(const void * _self) {
   const List * self = _self;
 }
+
+const void * list = NULL;
