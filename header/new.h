@@ -35,18 +35,18 @@ typedef struct Class {
   // a repeatable string for a class
   const char * description;
   // the list of interfaces implemented by the type
-  Interface * interfaces;
+  const Interface * interfaces;
 
   // constructor takes a type descripter and an argument list, calls the type's constructor with the argument list, and returns the constructed object.
-  void * (* constructor)(void * _Type, va_list * app);
+  void * (* constructor)(void * const _self, va_list * app);
   // destructor takes an object and calls its own destructor.
-  void * (* destructor)(void * _self);
+  void * (* destructor)(void * const _self);
   // clone takes an object, calls its own clone method and returns a cloned object. clone shall always create a new object.
-  void * (* clone)(const void * _self) _CONST_METHOD;
+  void * (* clone)(const void * const _self) _CONST_METHOD;
   // differ takes two objects, returns if the objects differs (according to the object's class's own differ method).
-  int (* differ)(const void * _self, const void * _other) _CONST_METHOD;
+  int (* differ)(const void * const _self, const void * _other) _CONST_METHOD;
   // Returns a string representation of the object.
-  void * (*to_string)(const void * _self) _CONST_METHOD;
+  void * (*to_string)(const void * const _self) _CONST_METHOD;
 } Class;
 
 // Create a new instace.
@@ -57,31 +57,31 @@ void * new(const void * _Type, ...) _THROWS;
 // Recycle the space used by an object.
 //// Will NOT throw error when the argument is NULL or the argument is not a valid object.
 //// delete(obj)
-void delete(void * _self) _NO_THROW;
+void delete(void * const _self) _NO_THROW;
 
 // Returns a new object with the same class and the same type-specific data.
 //// WILL throw an error when the first argument is NULL, or no class at the beginning of the object, or no clone (+2*(sizeof(void*)) offset) function pointer.
 //// void * obj2 = clone(obj1);
-void * clone(const void * _self) _THROWS;
+void * clone(const void * const _self) _THROWS;
 
 // Returns whether the two objects differs (according to the first object's differ method).
 //// WILL throw an error when the first argument is NULL, or no class at the beginning of the object, or no differ (+3*(sizeof(void*)) offset) function pointer.
 //// if (differ(a, b)) { ... }
-int differ(const void * _self, const void * _other) _THROWS;
+int differ(const void * const _self, const void * _other) _THROWS;
 
 // Returns the size.
 //// WILL throw an error when the first argument is NULL, or no class at the beginning of the object.
-size_t size_of(const void * _self) _THROWS;
+size_t size_of(const void * const _self) _THROWS;
 
 // Returns a string representation of the object.
 //// By default, this uses the `def_to_string` function to return the description of the class. To enable this, just provide a `NULL` to the `to_string` function pointer when defining a type.
 //// WILL throw an error when the first argument is NULL, or no class at the beginning of the object.
-void * to_string(const void * _self) _THROWS;
+void * to_string(const void * const _self) _THROWS;
 
 
 // Returns whether an object is an instance of the given class.
 //// WILL throw an error when the first argument is NULL, or no class at the beginning of the object.
-int is_instance(const void * _self, const void * _class) _THROWS;
+int is_instance(const void * const _self, const void * _class) _THROWS;
 
 // Returns whether a class has implemented the given interface.
 //// WILL throw an error when the first argument is NULL.

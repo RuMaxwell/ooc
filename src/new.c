@@ -67,7 +67,7 @@ void * new(const void * _Type, ...) {
 
 // Recycle the space used by an object.
 //// Will NOT throw error when the argument is NULL or the argument is not a valid object.
-void delete(void * _self) {
+void delete(void * const _self) {
   Class ** object = _self; // convert the pointer into a valid object
 
   // garbage collection: finding the object node
@@ -104,7 +104,7 @@ void delete(void * _self) {
 
 // Returns a new object with the same class and the same type-specific data.
 //// WILL throw an error when the first argument is NULL, or no class at the beginning of the object, or no clone (+2*(sizeof(void*)) offset) function pointer.
-void * clone(const void * _self) {
+void * clone(const void * const _self) {
   const Class * const * self = _self; // *self is a const pointer; self represents the object, *self represent the pointer to the class
 
   if (!_self || !(*self) || !((*self)->clone))
@@ -115,7 +115,7 @@ void * clone(const void * _self) {
 
 // Returns whether the two objects differs (according to the first object's differ method).
 //// WILL throw an error when the first argument is NULL, or no class at the beginning of the object, or no differ (+3*(sizeof(void*)) offset) function pointer.
-int differ(const void * _self, const void * _other) {
+int differ(const void * const _self, const void * _other) {
   const Class * const * self = _self; // the same with clone()
 
   if (!_self || !(*self) || !((*self)->differ))
@@ -126,7 +126,7 @@ int differ(const void * _self, const void * _other) {
 
 // Returns the size.
 //// WILL throw an error when the first argument is NULL, or no class at the beginning of the object.
-size_t size_of(const void * _self) {
+size_t size_of(const void * const _self) {
   const Class * const * self = _self; // the same with clone()
 
   if (!_self || !(*self))
@@ -136,7 +136,7 @@ size_t size_of(const void * _self) {
 }
 
 // default `to_string` method to be used when the class does not provide its own `to_string` method
-void * def_to_string(const void * _self) _PRIVATE_METHOD {
+void * def_to_string(const void * const _self) _PRIVATE_METHOD {
   const Class * const * self = _self;
 
   if (!_self || !(*self))
@@ -148,7 +148,7 @@ void * def_to_string(const void * _self) _PRIVATE_METHOD {
 // Returns a string representation of the object.
 //// By default, this uses the `def_to_string` function to return the description of the class. To enable this, just provide a `NULL` to the `to_string` function pointer when defining a type.
 //// WILL throw error when the first argument is NULL, or no class at the beginning of the object.
-void * to_string(const void * _self) {
+void * to_string(const void * const _self) {
   const Class * const * self = _self;
 
   if (!_self || !(*self))
@@ -159,7 +159,7 @@ void * to_string(const void * _self) {
 
 // Returns whether an object is an instance of the given class.
 //// WILL throw an error when the first argument is NULL, or no class at the beginning of the object.
-int is_instance(const void * _self, const void * _class) {
+int is_instance(const void * const _self, const void * _class) {
   const Class * const * self = _self;
 
   if (!_self || !(*self))
@@ -182,7 +182,7 @@ void * get_interface(const void * _class, const int interface) {
   if (!_class || !(*class))
     error(ERR_NULLREF);
 
-  Interface * p = (*class)->interfaces;
+  const Interface * p = (*class)->interfaces;
   for (; p != NULL; p = p->next) {
     if (* (int *)(p->interface) == interface) {
       return p->interface;

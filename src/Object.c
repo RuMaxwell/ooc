@@ -1,18 +1,23 @@
 #include "../header/Object.h"
 
-void * Object_constructor(void * _self, va_list * _) {
+typedef struct Object {
+  const void * class;
+} Object;
+
+
+void * Object_constructor(void * const _self, va_list * _) {
   return _self;
 }
 
-void * Object_destructor(void * _self) {
+void * Object_destructor(void * const _self) {
   return _self;
 }
 
-void * Object_clone(const void * _self) {
+void * Object_clone(const void * const _self) {
   return new(object);
 }
 
-int Object_differ(const void * _self, const void * _other) {
+int Object_differ(const void * const _self, const void * _other) {
   return _self != _other;
 }
 

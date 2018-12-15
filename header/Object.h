@@ -5,8 +5,4 @@
 
 extern const void * object;
 
-typedef struct Object {
-  const void * class;
-} Object;
-
 #endif // !_OBJECT_H

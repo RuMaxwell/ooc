@@ -1,12 +1,10 @@
-#include "../header/Console.h"
+#include "../header/console.h"
 
 void putstr(const void * _string) {
-  const String * str = _string;
-
-  if (!is_instance(str, string))
+  if (!is_instance(_string, string))
     error(ERR_TYPE("string"));
 
-  printf("%s", str->chs);
+  printf("%s", c_str(_string));
 }
 
 void putstrln(const void * _string) {

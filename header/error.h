@@ -4,7 +4,8 @@
 #include <assert.h>
 #include <stdio.h>
 
-#define ERR_MALLOC "malloc error: Failed to allocate memory"
+#define ERR_INDEX "index error: Index out of range."
+#define ERR_MALLOC "malloc error: Failed to allocate memory."
 #define ERR_NULLREF "null reference error: Object pointer is null."
 #define ERR_TYPE(TYPE) "type error: Expected a(an) " TYPE " object."
 

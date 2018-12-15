@@ -5,14 +5,8 @@
 #include "./interfaces.h"
 #include <string.h>
 
-extern const void * string;
+extern const void * string; /* ISequential */
 
-typedef struct String /* ISequential */ {
-  const void * class;
-  size_t length;
-  char * chs;
-} String;
-
-char * c_str(const void * _self) _CONST_METHOD;
+char * c_str(const void * const _self) _CONST_METHOD;
 
 #endif
