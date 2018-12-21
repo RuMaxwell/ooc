@@ -44,17 +44,12 @@ static void * List_destructor(void * const _self) {
   List * self = _self;
   struct list_node * p = self->head;
   if (!p) return self;
-  extern void * pop(void * const _self);
 
-  // struct list_node * q = p->next;
-  // for (; p != NULL; p = q) {
-  //   remove_list_node(p);
-  //   p = q;
-  //   if (q) q = q->next;
-  // }
-
-  for (size_t i = 0; i < self->length; i++) {
-    pop(self);
+  struct list_node * q = p->next;
+  for (; p != NULL; p = q) {
+    remove_list_node(p);
+    p = q;
+    if (q) q = q->next;
   }
 
   return self;
@@ -92,7 +87,7 @@ static int List_differ(const void * const _self, const void * _other) {
 
 static void * List_to_string(const void * const _self) {
   const List * self = _self;
-  void * s = new(string, "[");
+  void * s = S("[");
   if (self->length <= 0) {
     push(s, (void *)(int)']');
     return s;
@@ -150,37 +145,90 @@ static void List_ISequence_set(void * const _self, size_t index, void * _object)
   p->object = _object;
 }
 
-static size_t List_ISequence_push(void * const _self, const void * _object) {
+// static size_t List_ISequence_push(void * const _self, const void * _object) {
+//   List * self = _self;
+
+//   struct list_node * p = new_list_node(_object);
+//   if (!self->head) {
+//     self->head = p;
+//     self->last = p;
+//   } else {
+//     self->last->next = p;
+//     p->prev = self->last;
+//     self->last = p;
+//   }
+//   self->length++;
+
+//   return self->length;
+// }
+
+// static void * List_ISequence_pop(void * const _self) {
+//   List * self = _self;
+
+//   if (self->length <= 0)
+//     error(ERR_INDEX);
+
+//   struct list_node * p = self->last;
+//   void * obj = p->object;
+//   struct list_node * q = p->prev;
+//   remove_list_node(p);
+//   self->length--;
+//   self->last = q;
+
+//   return obj;
+// }
+
+static size_t List_ISequence_insert(void * const _self, size_t index, const void * _object) {
   List * self = _self;
 
-  struct list_node * p = new_list_node(_object);
-  if (!self->head) {
-    self->head = p;
-    self->last = p;
-  } else {
-    self->last->next = p;
-    p->prev = self->last;
-    self->last = p;
-  }
-  self->length++;
+  struct list_node * n = new_list_node(_object);
 
+  if (index == self->length) {
+    if (self->length == 0) {
+      self->head = n;
+      self->last = n;
+    }
+    self->last->next = n;
+    n->prev = self->last;
+    self->last = n;
+  }
+  else if (index == 0) {
+    n->next = self->head;
+    self->head->prev = n;
+    self->head = n;
+  }
+  else {
+    struct list_node * p = self->head;
+    for (int i = 0; i < index; i++)
+      p = p->next;
+    n->next = p;
+    n->prev = p->prev;
+    p->prev->next = n;
+    p->prev = n;
+  }
+
+  self->length++;
   return self->length;
 }
 
-static void * List_ISequence_pop(void * const _self) {
+static void * List_ISequence_drop(void * const _self, size_t index) {
   List * self = _self;
 
-  if (self->length <= 0)
-    error(ERR_INDEX);
-
-  struct list_node * p = self->last;
-  void * obj = p->object;
-  struct list_node * q = p->prev;
-  remove_list_node(p);
-  self->length--;
-  self->last = q;
-
-  return obj;
+  if (index == self->length - 1) {
+    void * obj = self->last->object;
+    remove_list_node(self->last);
+    self->length--;
+    return obj;
+  }
+  else {
+    struct list_node * p = self->head;
+    for (int i = 0; i < index; i++)
+      p = p->next;
+    void * obj = p->object;
+    remove_list_node(p);
+    self->length--;
+    return obj;
+  }
 }
 
 static void * List_ISequence_append(void * const _self, const void * _other) {
@@ -192,7 +240,8 @@ static void * List_ISequence_append(void * const _self, const void * _other) {
 
   struct list_node * n = other->head;
   for (int i = 0; i < other->length; i++) {
-    List_ISequence_push(self, n->object);
+    List_ISequence_insert(self, self->length, n->object);
+    self->length++;
     n = n->next;
   }
 
@@ -206,16 +255,15 @@ static void * List_ISequential_concat(const void * const _self, const void * _ot
 }
 
 static const ISequential _list_i_sequential = {
-  /* magic */ I_SEQUENTIAL,
-  /* length */ List_ISequential_length,
-  /* head */ List_ISequential_head,
-  /* tail */ List_ISequential_tail,
-  /* get */ List_ISequence_get,
-  /* set */ List_ISequence_set,
-  /* push */ List_ISequence_push,
-  /* pop */ List_ISequence_pop,
-  /* append */ List_ISequence_append,
-  /* concat */ List_ISequential_concat
+  .magic = I_SEQUENTIAL,
+  .length = List_ISequential_length,
+  .head = List_ISequential_head,
+  .tail = List_ISequential_tail,
+  .get = List_ISequence_get,
+  .set = List_ISequence_set,
+  .insert = List_ISequence_insert,
+  .drop = List_ISequence_drop,
+  .append = List_ISequence_append,
 };
 
 static const Interface _list_interfaces = {
@@ -224,14 +272,30 @@ static const Interface _list_interfaces = {
 };
 
 static const Class _list = {
-  /* size */ sizeof (List),
-  /* description */ "list",
-  /* interfaces */ & _list_interfaces,
-  /* constructor */ List_constructor,
-  /* destructor */ List_destructor,
-  /* clone */ List_clone,
-  /* differ */ List_differ,
-  /* to_string */ List_to_string
+  .size = sizeof (List),
+  .description = "list",
+  .interfaces = & _list_interfaces,
+  .constructor = List_constructor,
+  .destructor = List_destructor,
+  .clone = List_clone,
+  .differ = List_differ,
+  .to_string = List_to_string
 };
 
 const void * list = & _list;
+
+
+//////// METHODS ////////
+
+void * LIST(int count, ...) {
+  va_list ap;
+  va_start(ap, count);
+  void * p = new(list);
+  void * obj = NULL;
+  for (int i = 0; i < count; i++) {
+    obj = va_arg(ap, void *);
+    push(p, obj);
+  }
+  va_end(ap);
+  return p;
+}

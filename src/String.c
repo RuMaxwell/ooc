@@ -81,23 +81,50 @@ static void String_ISequential_set(void * const _self, size_t index, void * _obj
   self->chs[index] = c;
 }
 
-static size_t String_ISequential_push(void * const _self, const void * _object) {
+// static size_t String_ISequential_push(void * const _self, const void * _object) {
+//   String * self = _self;
+//   char c = (int)_object;
+//   char * str = malloc(self->length + 2);
+//   strcpy(str, self->chs);
+//   str[self->length] = c;
+//   str[self->length + 1] = '\0';
+//   free(self->chs);
+//   self->chs = str;
+//   self->length++;
+//   return self->length;
+// }
+
+// static void * String_ISequentail_pop(void * const _self) {
+//   String * self = _self;
+//   char c = self->chs[self->length - 1];
+//   self->chs[self->length - 1] = '\0';
+//   self->length--;
+//   return (void *)(int)c;
+// }
+
+static size_t String_ISequentail_insert(void * const _self, size_t index, const void * _object) {
   String * self = _self;
   char c = (int)_object;
   char * str = malloc(self->length + 2);
+  char * tail = malloc(self->length - index + 1);
+  strcpy(tail, (self->chs + index));
   strcpy(str, self->chs);
-  str[self->length] = c;
-  str[self->length + 1] = '\0';
+  str[index] = '\0';
+  str[index] = c;
+  str[index + 1] = '\0';
+  strcat(str, tail);
+  free(tail);
   free(self->chs);
   self->chs = str;
   self->length++;
   return self->length;
 }
 
-static void * String_ISequentail_pop(void * const _self) {
+static void * String_ISequentail_drop(void * const _self, size_t index) {
   String * self = _self;
-  char c = self->chs[self->length - 1];
-  self->chs[self->length - 1] = '\0';
+  char c = (int)self->chs[index];
+  self->chs[index] = '\0';
+  strcpy(self->chs + index, self->chs + index + 1);
   self->length--;
   return (void *)(int)c;
 }
@@ -117,36 +144,16 @@ static void * String_ISequentail_append(void * const _self, const void * _other)
   self->length += other->length;
 }
 
-static void * String_ISequential_concat(const void * const _self, const void * _other) {
-  const String * self = _self;
-  const String * other = _other;
-
-  if (!_other || !(other->class))
-    error(ERR_NULLREF);
-  if (!is_instance(other, string))
-    error(ERR_TYPE("string"));
-
-  String * r = new(string, "");
-  r->length = self->length + other->length;
-  free(r->chs); r->chs = NULL;
-  r->chs = malloc(r->length + 1);
-  r->chs[0] = '\0';
-  strcat(r->chs, self->chs);
-  strcat(r->chs, other->chs);
-  return r;
-}
-
 static const ISequential _string_i_sequential = {
-  /* magic */ I_SEQUENTIAL,
-  /* length */ String_ISequential_length,
-  /* head */ String_ISequential_head,
-  /* tail */ String_ISequential_tail,
-  /* get */ String_ISequential_get,
-  /* set */ String_ISequential_set,
-  /* push */ String_ISequential_push,
-  /* pop */ String_ISequentail_pop,
-  /* append */ String_ISequentail_append,
-  /* concat */ String_ISequential_concat
+  .magic = I_SEQUENTIAL,
+  .length = String_ISequential_length,
+  .head = String_ISequential_head,
+  .tail = String_ISequential_tail,
+  .get = String_ISequential_get,
+  .set = String_ISequential_set,
+  .insert = String_ISequentail_insert,
+  .drop = String_ISequentail_drop,
+  .append = String_ISequentail_append,
 };
 
 static const Interface _string_interfaces = {
@@ -155,14 +162,14 @@ static const Interface _string_interfaces = {
 };
 
 static const Class _string = {
-  /* size */ sizeof (String),
-  /* description */ "string",
-  /* interfaces */ & _string_interfaces,
-  /* constructor */ String_constructor,
-  /* destructor */ String_destructor,
-  /* clone */ String_clone,
-  /* differ */ String_differ,
-  /* to_string */ String_to_string
+  .size = sizeof (String),
+  .description = "string",
+  .interfaces = & _string_interfaces,
+  .constructor = String_constructor,
+  .destructor = String_destructor,
+  .clone = String_clone,
+  .differ = String_differ,
+  .to_string = String_to_string
 };
 
 const void * string = & _string;
@@ -180,4 +187,21 @@ char * c_str(const void * const _self) {
     error(ERR_TYPE("String"));
 
   return self->chs;
+}
+
+void * compose(int count, ...) {
+  va_list ap;
+  va_start(ap, count);
+
+  void * obj;
+  void * str = new(string, "");
+  for (int i = 0; i < count; i++) {
+    obj = va_arg(ap, void *);
+    if (!obj) error("unknown error");
+    void * obj_str = to_string(obj);
+    append(str, obj_str);
+    delete(obj_str);
+  }
+
+  return str;
 }

@@ -24,6 +24,8 @@
 #define _CONST_METHOD // function that do not modify the first object pointer (used after a member function pointer)
 #define _PRIVATE_METHOD // function that only declared and defined in the source file but not visible in the header file
 
+#define var void *
+
 typedef struct Interface {
   void * interface;
   struct Interface * next;
@@ -46,7 +48,7 @@ typedef struct Class {
   // differ takes two objects, returns if the objects differs (according to the object's class's own differ method).
   int (* differ)(const void * const _self, const void * _other) _CONST_METHOD;
   // Returns a string representation of the object.
-  void * (*to_string)(const void * const _self) _CONST_METHOD;
+  void * (* to_string)(const void * const _self) _CONST_METHOD;
 } Class;
 
 // Create a new instace.

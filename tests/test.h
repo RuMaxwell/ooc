@@ -2,49 +2,58 @@
 #include "../header/String.h"
 #include "../header/ImmutableList.h"
 #include "../header/List.h"
-#include "../header/console.h"
+#include "../header/io.h"
 
 #include <stdio.h>
 
 void test_string() {
-  void * obj = new(object);
-  void * hello = new(string, "Hello, world");
-  void * obj_str = to_string(obj);
+  var obj = new(object);
+  var hello = S("Hello, world");
+  var obj_str = to_string(obj);
 
   print(obj);
   print(hello);
   putstrln(obj_str);
 
   printf("%s = %ld\n", c_str(hello), length(hello));
-  void * cat_str = concat(hello, obj_str);
+  var cat_str = concat(hello, obj_str);
   printf("%s = %ld\n", c_str(cat_str), length(cat_str));
 }
 
 void test_ulist() {
-  void * lst = cons(
-    new(string, "1"), cons(
-    new(string, "2"), cons(
-    new(string, "3"), cons(
-    new(string, "4"), cons(
-    new(string, "5"), new(ulist)
+  var lst = cons(
+    S("1"), cons(
+    S("2"), cons(
+    S("3"), cons(
+    S("4"), cons(
+    S("5"), new(ulist)
     )))));
 
   print(lst);
 }
 
 void test_list() {
-  void * lst = new(list);
-  push(lst, new(string, "1"));
-  push(lst, new(string, "2"));
-  push(lst, new(string, "3"));
-  push(lst, new(string, "4"));
-  push(lst, new(string, "5"));
+  var lst = LIST(5, S("1"), S("2"), S("3"), S("4"), S("5"));
   print(lst);
-  void * str = pop(lst);
+  var str = pop(lst);
   print(str);
   print(lst);
 
-  void * lst2 = clone(lst);
+  var lst2 = clone(lst);
   append(lst2, lst);
   print(lst2);
+}
+
+void test_io() {
+  var str0 = S("str0");
+  var str1 = S("str1");
+  var obj = new(object);
+
+  printc(3, str0, str1, obj, obj);
+  printcfg(STDOUT_COMMA_3, str0, str1, obj);
+}
+
+void test_file() {
+  var txt = new(file_handler, "text.txt");
+  write_file(txt, S("Hello, world."));
 }

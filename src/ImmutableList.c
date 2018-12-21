@@ -51,12 +51,12 @@ static int UList_differ(const void * const _self, const void * _other) {
 
 static void * UList_to_string_helper(const void * const _self) {
   const UList * self = _self;
-  void * res = new(string, "");
+  void * res = S("");
   if (self) {
     const void * head = self->head;
     const void * tail = self->tail;
     if (head) {
-      void * comma = new(string, ",");
+      void * comma = S(",");
       void * str, * res1, * res2, * res3;
       str = to_string(head);
       res1 = concat(res, str);
@@ -75,8 +75,8 @@ static void * UList_to_string_helper(const void * const _self) {
 
 static void * UList_to_string(const void * const _self) {
   void * res = UList_to_string_helper(_self);
-  void * lbr = new(string, "[");
-  void * rbr = new(string, "]");
+  void * lbr = S("[");
+  void * rbr = S("]");
   void * res1 = concat(lbr, res);
   void * res2 = concat(res1, rbr);
   delete(res); delete(lbr); delete(rbr); delete(res1);
@@ -84,14 +84,14 @@ static void * UList_to_string(const void * const _self) {
 }
 
 static const Class _ulist = {
-  /* size */ sizeof (UList),
-  /* description */ "ulist",
-  /* interfaces */ NULL,
-  /* constructor */ UList_constructor,
-  /* destructor */ UList_destructor,
-  /* clone */ UList_clone,
-  /* differ */ UList_differ,
-  /* to_String */ UList_to_string
+  .size = sizeof (UList),
+  .description = "ulist",
+  .interfaces = NULL,
+  .constructor = UList_constructor,
+  .destructor = UList_destructor,
+  .clone = UList_clone,
+  .differ = UList_differ,
+  .to_string = UList_to_string
 };
 
 const void * ulist = & _ulist;

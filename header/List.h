@@ -11,4 +11,6 @@
 
 extern const void * list; /* ISequential */
 
+void * LIST(int count, ...);
+
 #endif

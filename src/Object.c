@@ -22,14 +22,14 @@ int Object_differ(const void * const _self, const void * _other) {
 }
 
 static const Class _object = {
-  /* size */ sizeof (Object),
-  /* description */ "object",
-  /* interfaces */ NULL,
-  /* constructor */ Object_constructor,
-  /* destructor */ Object_destructor,
-  /* clone */ Object_clone,
-  /* differ */ Object_differ,
-  /* to_string */ NULL
+  .size = sizeof (Object),
+  .description = "object",
+  .interfaces = NULL,
+  .constructor = Object_constructor,
+  .destructor = Object_destructor,
+  .clone = Object_clone,
+  .differ = Object_differ,
+  .to_string = NULL
 };
 
 const void * object = & _object;

@@ -20,14 +20,12 @@ typedef struct ISequential {
   void * (* get)(const void * const _self, size_t index);
   // Set an element at the specific index in the sequence.
   void (* set)(void * const _self, size_t index, void * _object);
-  // Add an element at the end of a sequence.
-  size_t (* push)(void * const _self, const void * _object);
-  // Remove the element at the end of a sequence.
-  void * (* pop)(void * const _self);
+  // Insert an element at the specific index.
+  size_t (* insert)(void * const _self, size_t index, const void * _object);
+  // Remove the element at the specific index.
+  void * (* drop)(void * const _self, size_t index);
   // Concatinate a sequence onto the end of a sequence.
   void * (* append)(void * const _self, const void * _other);
-  // Get the concatination of two sequences of the same type.
-  void * (* concat)(const void * const _self, const void * _other);
 } ISequential;
 
 size_t length(const void * const _self);
@@ -35,9 +33,16 @@ void * head(const void * const _self);
 void * tail(const void * const _self);
 void * get(const void * const _self, size_t index);
 void set(void * const _self, size_t index, void * _object);
-size_t push(void * const _self, const void * _object);
-void * pop(void * const _self);
+size_t insert(void * const _self, size_t index, const void * _object);
+void * drop(void * const _self, size_t index);
 void * append(void * const _self, const void * _other);
+
+/* Automatic Implementation */
+// Add an element at the end of a sequence.
+size_t push(void * const _self, const void * _object);
+// Remove the element at the end of a sequence.
+void * pop(void * const _self);
+// Get the concatination of two sequences of the same type.
 void * concat(const void * const _self, const void * _other);
 
 #endif

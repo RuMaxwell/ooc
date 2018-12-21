@@ -14,7 +14,7 @@ static void pop_node();
 static struct object_node * find_node(void * _object);
 // static void remove_node(struct object_node * _node);
 
-// bind(str, new(string, "a string"));
+// bind(str, S("a string"));
 // bind(str1, str);
 // #define bind(name, obj)\
 //   void * name = obj;\
