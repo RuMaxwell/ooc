@@ -1,11 +1,11 @@
 #include "../header/ISequential.h"
 
-#define _CHECK\
+#define _CHECK_INTERFACE(IInterface, I_MAGIC, IDescription)\
   const Class * const * self = _self;\
   if (!_self || !(*self)) error(ERR_NULLREF);\
-  ISequential * i = NULL;\
-  if (!(i = get_interface(self, I_SEQUENTIAL))) error(ERR_TYPE("ISequential"));
-
+  IInterface * i = NULL;\
+  if (!(i = get_interface(self, I_MAGIC))) error(ERR_TYPE(IDescription));
+#define _CHECK _CHECK_INTERFACE(ISequential, I_SEQUENTIAL, "ISequential")
 
 size_t length(const void * const _self) {
   _CHECK

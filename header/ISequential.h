@@ -6,7 +6,7 @@
 #define ERR_NO_HEAD "index error: Cannot retrieve head from an empty sequence."
 #define ERR_NO_POP "index error: Cannot pop from an empty sequence."
 
-#define I_SEQUENTIAL 1
+#define I_SEQUENTIAL 0x13051114
 
 typedef struct ISequential {
   const int magic;

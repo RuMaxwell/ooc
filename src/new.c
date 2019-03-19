@@ -151,8 +151,12 @@ void * def_to_string(const void * const _self) _PRIVATE_METHOD {
 void * to_string(const void * const _self) {
   const Class * const * self = _self;
 
-  if (!_self || !(*self))
+  if (!_self || !(*self)) {
+    // char intconst[16];
+    // itoa((int)self, intconst, 10);
+    // return new(string, intconst);
     error(ERR_NULLREF);
+  }
 
   return (*self)->to_string ? (*self)->to_string(_self) : def_to_string(_self);
 }

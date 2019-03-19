@@ -73,7 +73,9 @@ void printc(int count, ...) {
 }
 
 void fprint(void * file, void * _object) {
-  // TODO:
+  void * str = to_string(_object);
+  write_file(file, str);
+  delete(str);
 }
 
 void printcfg(struct print_config * config, ...) {

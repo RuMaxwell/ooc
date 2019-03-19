@@ -7,9 +7,6 @@
 
 #define ERR_PRT_COUNT "value error: Not enough number of objects to be printed."
 
-#define STDOUT_FILE ((void *)0)
-#define STDERR_FILE ((void *)1)
-
 struct print_config {
   int count;
   char * end;
@@ -70,21 +67,21 @@ void printc(int count, ...);
  *   file: file_handler
  *   _object: object
  */
-// void fprint(void * file, void * _object);
+void fprint(void * file, void * _object);
 
 /*
  * Print an object to a file without adding a line break.
  *   file: file_handler
  *   _object: object
  */
-// void fprintnln(void * file, void * _object);
+void fprintnln(void * file, void * _object);
 
 /*
  * Print several objects to a file. The number of the objects is indicated by `count`. The objects are seperated by a space.
  *   file: file_handler
  *   ...: object, object, ...
  */
-// void fprintc(void * file, int count, ...);
+void fprintc(void * file, int count, ...);
 
 /*
  * Print several objects using in a specific format according to `config`.

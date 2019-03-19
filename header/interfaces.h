@@ -3,5 +3,6 @@
 
 #include "./IComparable.h"
 #include "./ISequential.h"
+#include "./IArithmetic.h"
 
 #endif

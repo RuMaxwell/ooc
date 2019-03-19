@@ -3,7 +3,7 @@
 
 #include "./new.h"
 
-#define I_COMPARABLE 0
+#define I_COMPARABLE 0x030f0d10 // parseInt("COMP".map(x => parseInt(x - 'A')).join())
 
 typedef struct IComparable {
   const int magic;

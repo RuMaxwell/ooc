@@ -2,6 +2,8 @@
 #include "../header/String.h"
 #include "../header/ImmutableList.h"
 #include "../header/List.h"
+#include "../header/Matrix.h"
+#include "../header/Integer.h"
 #include "../header/io.h"
 
 #include <stdio.h>
@@ -54,6 +56,21 @@ void test_io() {
 }
 
 void test_file() {
-  var txt = new(file_handler, "text.txt");
-  write_file(txt, S("Hello, world."));
+  var txt = new(file_handler, "text1.txt");
+  write_file(txt, S("Hello, world.\nIt's should be normal."));
+  var newtxt = read_file(txt);
+  print(newtxt);
+  // FIXME:
+  // var newnewtxt = read_file(STDIN_HANDLER);
+  // print(newnewtxt);
+}
+
+void test_matrix() {
+  var m = new(matrix, 3, 3);
+  var one = I(1);
+  var two = I(2);
+  fill(m, one);
+  print(m);
+  setMData(m, 1, 1, two);
+  print(m);
 }

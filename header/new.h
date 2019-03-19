@@ -18,6 +18,7 @@
 #include <malloc.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define _THROWS // function that throws error (used at the end of a header function declaration)
 #define _NO_THROW // function that do not throw error (used at the end of a header function declaration)
@@ -25,6 +26,12 @@
 #define _PRIVATE_METHOD // function that only declared and defined in the source file but not visible in the header file
 
 #define var void *
+
+// Constants
+#define CHAR(c) (void *)(int)(c)
+#define INT(i) (void *)(i)
+#define LONG(l) (void *)(l)
+#define SIZE_T(l) (void *)(l)
 
 typedef struct Interface {
   void * interface;

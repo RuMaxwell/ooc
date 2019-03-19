@@ -2,7 +2,7 @@
 
 extern const void * string;
 
-typedef struct String  {
+typedef struct String {
   const void * class;
   size_t length;
   char * chs;

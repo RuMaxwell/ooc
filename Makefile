@@ -1,4 +1,4 @@
-default: compile link run
+default: clean compile link run
 
 compile:
 	@echo Compiling...
