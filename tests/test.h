@@ -73,4 +73,13 @@ void test_matrix() {
   print(m);
   setMData(m, 1, 1, two);
   print(m);
+
+  var m1 = new(matrix, 3, 3);
+  var zero = I(0);
+  fill(m1, zero);
+  setMData(m1, 1, 0, one);
+  setMData(m1, 1, 2, one);
+  add(m, m1);
+  print(m1);
+  print(m);
 }

@@ -94,8 +94,10 @@ static void* Matrix_IArithmetic_add(void* const _self, const void* _other) {
     error(ERR_VALUE("Expected two matrices of the same size."))
 
   for (int i = 0; i < self->rows; i++)
-    for (int j = 0; j < self->cols; j++)
-      add(self->data[i][j].data, other->data[i][j].data);
+    for (int j = 0; j < self->cols; j++) {
+      void* n = plus(self->data[i][j].data, other->data[i][j].data);
+      self->data[i][j].data = n;
+    }
 
   return self;
 }
@@ -108,8 +110,10 @@ static void* Matrix_IArithmetic_subtract(void* const _self, const void* _other) 
     error(ERR_VALUE("Expected two matrices of the same size."))
 
   for (int i = 0; i < self->rows; i++)
-    for (int j = 0; j < self->cols; j++)
-      subtract(self->data[i][j].data, other->data[i][j].data);
+    for (int j = 0; j < self->cols; j++) {
+      void* n = minus(self->data[i][j].data, other->data[i][j].data);
+      self->data[i][j].data = n;
+    }
 
   return self;
 }
@@ -225,4 +229,20 @@ void fill(void* const _self, void* value) {
       self->data[i][j].data = value;
     }
   }
+}
+
+void* scalarMultiply(const void* const _self, const void* scalar, void* (*f)(void*, void*)) {
+  error(ERR_NOTIMPLEMENTED)
+}
+void* scalarMMultiply(const void* const _self, const void* _other, void* (*f)(void*, void*)) {
+  error(ERR_NOTIMPLEMENTED)
+}
+void* mMultiply(const void* const _self, const void* _other) {
+  error(ERR_NOTIMPLEMENTED)
+}
+void* mInverse(const void* const _self) {
+  error(ERR_NOTIMPLEMENTED)
+}
+void* mTranspose(const void* const _self) {
+  error(ERR_NOTIMPLEMENTED)
 }
