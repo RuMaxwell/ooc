@@ -23,9 +23,9 @@ static void* Matrix_constructor(void* const _self, va_list* app) {
   self->cols = cols > 0 ? cols : 0;
   if (self->rows == 0 || self->cols == 0) return self;
 
-  self->data = calloc(1, cols * sizeof (cell*));
-  for (size_t i = 0; i < cols; i++) {
-    self->data[i] = calloc(1, rows * sizeof (cell));
+  self->data = calloc(1, rows * sizeof (cell*));
+  for (size_t i = 0; i < rows; i++) {
+    self->data[i] = calloc(1, cols * sizeof (cell));
   }
 
   return self;
@@ -35,7 +35,7 @@ static void* Matrix_destructor(void* const _self) {
   Matrix* const self = _self;
 
   fill(self, NULL);
-  for (size_t i = 0; i < self->cols; i++) {
+  for (size_t i = 0; i < self->rows; i++) {
     if (self->data[i]) { free(self->data[i]), self->data[i] = NULL; }
   }
   if (self->data) free(self->data);
@@ -47,7 +47,7 @@ static void* Matrix_clone(const void* const _self) {
 
   for (size_t i = 0; i < self->rows; i++)
     for (size_t j = 0; j < self->cols; j++)
-      p->data[i][j].data = self->data[i][j].data;
+      p->data[i][j].data = getMData(self, i, j);
 
   return p;
 }
@@ -63,7 +63,7 @@ static int Matrix_differ(const void* const _self, const void* _other) {
     return 1;
   for (size_t i = 0; i < self->rows; i++)
     for (size_t j = 0; j < self->cols; j++)
-      if (other->data[i][j].data != self->data[i][j].data)
+      if (getMData(other, i, j) != getMData(self, i, j))
         return 1;
   return 0;
 }
@@ -74,7 +74,12 @@ static void* Matrix_to_string(const void* const _self) {
 
   for (size_t i = 0; i < self->rows; i++) {
     for (size_t j = 0; j < self->cols; j++) {
-      void* es = to_string(self->data[i][j].data);
+      void* dt = getMData(self, i, j);
+      void* es;
+      if (dt == NULL)
+        es = S("(empty)");
+      else
+        es = to_string(dt);
       append(s, es);
       push(s, CHAR(' '));
       delete(es);
@@ -93,10 +98,10 @@ static void* Matrix_IArithmetic_add(void* const _self, const void* _other) {
   if (self->rows != other->rows || self->cols != other->cols)
     error(ERR_VALUE("Expected two matrices of the same size."))
 
-  for (int i = 0; i < self->rows; i++)
-    for (int j = 0; j < self->cols; j++) {
-      void* n = plus(self->data[i][j].data, other->data[i][j].data);
-      self->data[i][j].data = n;
+  for (size_t i = 0; i < self->rows; i++)
+    for (size_t j = 0; j < self->cols; j++) {
+      void* n = plus(getMData(self, i, j), getMData(other, i, j));
+      setMData(self, i, j, n);
     }
 
   return self;
@@ -109,10 +114,10 @@ static void* Matrix_IArithmetic_subtract(void* const _self, const void* _other) 
   if (self->rows != other->rows || self->cols != other->cols)
     error(ERR_VALUE("Expected two matrices of the same size."))
 
-  for (int i = 0; i < self->rows; i++)
-    for (int j = 0; j < self->cols; j++) {
-      void* n = minus(self->data[i][j].data, other->data[i][j].data);
-      self->data[i][j].data = n;
+  for (size_t i = 0; i < self->rows; i++)
+    for (size_t j = 0; j < self->cols; j++) {
+      void* n = minus(getMData(self, i, j), getMData(other, i, j));
+      setMData(self, i, j, n);
     }
 
   return self;
@@ -127,9 +132,9 @@ static void* Matrix_IArithmetic_plus(const void* const _self, const void* _other
 
   Matrix* m = new(matrix, self->rows, self->cols);
 
-  for (int i = 0; i < self->rows; i++)
-    for (int j = 0; j < self->cols; j++)
-      m->data[i][j].data = plus(self->data[i][j].data, other->data[i][j].data);
+  for (size_t i = 0; i < self->rows; i++)
+    for (size_t j = 0; j < self->cols; j++)
+      setMData(m, i, j, plus(getMData(self, i, j), getMData(other, i, j)));
 
   return m;
 }
@@ -143,11 +148,69 @@ static void* Matrix_IArithmetic_minus(const void* const _self, const void* _othe
 
   Matrix* m = new(matrix, self->rows, self->cols);
 
-  for (int i = 0; i < self->rows; i++)
-    for (int j = 0; j < self->cols; j++)
-      m->data[i][j].data = minus(self->data[i][j].data, other->data[i][j].data);
+  for (size_t i = 0; i < self->rows; i++)
+    for (size_t j = 0; j < self->cols; j++)
+      setMData(m, i, j, minus(getMData(self, i, j), getMData(other, i, j)));
 
   return m;
+}
+
+static const void* Matrix_IContainer_getElementType(const void* const _self) {
+  const Matrix* const self = _self;
+  if (self->cols == 0 || self->rows == 0 || some(_self, is_null))
+    return any;
+
+  size_t i, j;
+  const void* type = get_class(getMData(self, 0, 0));
+  for (i = 0; i < self->rows; i++)
+    for (j = 0; j < self->cols; j++)
+      if (get_class(getMData(self, i, j)) != type)
+        return any;
+  return type;
+}
+
+static size_t Matrix_IContainer_count(const void* const _self) {
+  const Matrix* const self = _self;
+
+  size_t i, j, count = 0;
+  for (i = 0; i < self->rows; i++)
+    for (j = 0; j < self->cols; j++)
+      count += getMData(self, i, j) == NULL ? 0 : 1;
+
+  return count;
+}
+
+static int Matrix_IContainer_contains(const void* const _self, const void* obj) {
+  const Matrix* const self = _self;
+
+  size_t i, j;
+  for (i = 0; i < self->rows; i++)
+    for (j = 0; j < self->cols; j++)
+      if (getMData(self, i, j) == obj)
+        return 1;
+  return 0;
+}
+
+static int Matrix_IContainer_some(const void* const _self, int (*filter)(const void* element)) {
+  const Matrix* const self = _self;
+
+  size_t i, j;
+  for (i = 0; i < self->rows; i++)
+    for (j = 0; j < self->cols; j++)
+      if (filter(getMData(self, i, j)))
+        return 1;
+  return 0;
+}
+
+static int Matrix_IContainer_every(const void* const _self, int (*filter)(const void* element)) {
+  const Matrix* const self = _self;
+
+  size_t i, j;
+  for (i = 0; i < self->rows; i++)
+    for (j = 0; j < self->cols; j++)
+      if (!filter(getMData(self, i, j)))
+        return 0;
+  return 1;
 }
 
 static const IArithmetic _matrix_i_arithmetic = {
@@ -157,10 +220,22 @@ static const IArithmetic _matrix_i_arithmetic = {
   .plus = Matrix_IArithmetic_plus,
   .minus = Matrix_IArithmetic_minus
 };
+static const IContainer _matrix_i_container = {
+  .magic = I_CONTAINER,
+  .getElementType = Matrix_IContainer_getElementType,
+  .count = Matrix_IContainer_count,
+  .contains = Matrix_IContainer_contains,
+  .some = Matrix_IContainer_some,
+  .every = Matrix_IContainer_every
+};
 
+static const Interface _matrix_interfaces_1 = {
+  (void*)(&_matrix_i_container),
+  NULL
+};
 static const Interface _matrix_interfaces = {
   (void*)(&_matrix_i_arithmetic),
-  NULL
+  (void*)(&_matrix_interfaces_1)
 };
 
 static const Class _matrix = {
@@ -211,7 +286,7 @@ void setMData(void* const _self, size_t r, size_t c, void* value) {
   if (!is_instance(_self, matrix))
     error(ERR_TYPE("Expected a matrix."))
 
-  const Matrix* const self = _self;
+  Matrix* const self = _self;
 
   if (r < 0 || r >= self->rows || c < 0 || c >= self->cols)
     error(ERR_INDEX)
@@ -226,23 +301,49 @@ void fill(void* const _self, void* value) {
   Matrix* const self = _self;
   for (size_t i = 0; i < self->rows; i++) {
     for (size_t j = 0; j < self->cols; j++) {
-      self->data[i][j].data = value;
+      setMData(self, i, j, value);
     }
   }
 }
 
-void* scalarMultiply(const void* const _self, const void* scalar, void* (*f)(void*, void*)) {
-  error(ERR_NOTIMPLEMENTED)
-}
-void* scalarMMultiply(const void* const _self, const void* _other, void* (*f)(void*, void*)) {
-  error(ERR_NOTIMPLEMENTED)
-}
-void* mMultiply(const void* const _self, const void* _other) {
-  error(ERR_NOTIMPLEMENTED)
-}
 void* mInverse(const void* const _self) {
-  error(ERR_NOTIMPLEMENTED)
+  error(ERR_NOTIMPLEMENTED);
 }
 void* mTranspose(const void* const _self) {
-  error(ERR_NOTIMPLEMENTED)
+  error(ERR_NOTIMPLEMENTED);
+}
+
+void* mMultiply(const void* const _self, const void* _other) {
+  const Matrix* const self = _self;
+  const Matrix* other = _other;
+  if (!_self || !(self->class) || !_other || !(other->class))
+    error(ERR_NULLREF)
+  if (self->class != matrix || other->class != matrix)
+    error(ERR_TYPE("matrix"))
+
+  // Check dimensions
+  if (self->cols != other->rows)
+    error(ERR_VALUE("mMultiply: Matrices dimensions unmatched."))
+
+  Matrix* res = new(matrix, self->rows, other->cols);
+
+  const void* elemType = getElementType(self);
+  if (elemType == any)
+    error(ERR_VALUE("mMultiply: Elements should be the same type of IArithmetic and INumeric."))
+
+  // Plain matrix multiplication  O(n^3)
+  size_t i, j, k;
+  void* sumvalue;
+  for (i = 0; i < self->rows; i++)
+    for (j = 0; j < other->cols; j++) {
+      sumvalue = zero(elemType);
+      for (k = 0; k < self->cols; k++) {
+        void* thisvalue = times(getMData(self, i, k), getMData(other, k, j));
+        add(sumvalue, thisvalue);
+        delete(thisvalue), thisvalue = NULL;
+      }
+      setMData(res, i, j, sumvalue);
+    }
+
+  return res;
 }

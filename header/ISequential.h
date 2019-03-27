@@ -28,21 +28,21 @@ typedef struct ISequential {
   void * (* append)(void * const _self, const void * _other);
 } ISequential;
 
-size_t length(const void * const _self);
-void * head(const void * const _self);
-void * tail(const void * const _self);
-void * get(const void * const _self, size_t index);
-void set(void * const _self, size_t index, void * _object);
-size_t insert(void * const _self, size_t index, const void * _object);
-void * drop(void * const _self, size_t index);
-void * append(void * const _self, const void * _other);
+size_t length(const void * const _ISequential);
+void * head(const void * const _ISequential);
+void * tail(const void * const _ISequential);
+void * get(const void * const _ISequential, size_t index);
+void set(void * const _ISequential, size_t index, void * _object);
+size_t insert(void * const _ISequential, size_t index, const void * _object);
+void * drop(void * const _ISequential, size_t index);
+void * append(void * const _ISequential, const void * _other);
 
 /* Automatic Implementation */
 // Add an element at the end of a sequence.
-size_t push(void * const _self, const void * _object);
+_NO_NEED_IMPLEMENT size_t push(void * const _ISequential, const void * _object);
 // Remove the element at the end of a sequence.
-void * pop(void * const _self);
+_NO_NEED_IMPLEMENT void * pop(void * const _ISequential);
 // Get the concatination of two sequences of the same type.
-void * concat(const void * const _self, const void * _other);
+_NO_NEED_IMPLEMENT void * concat(const void * const _ISequential, const void * _other);
 
 #endif

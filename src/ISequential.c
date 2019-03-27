@@ -78,6 +78,6 @@ void * pop(void * const _self) {
 
 void * concat(const void * const _self, const void * _other) {
   void * res = clone(_self);
-  append(res, _self);
+  append(res, _other);
   return res;
 }

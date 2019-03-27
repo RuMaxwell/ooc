@@ -7,12 +7,14 @@
 
 typedef struct IArithmetic {
   const int magic;
+  void* (*zero)();
   void* (*add)(void* const _self, const void* _other);
   void* (*subtract)(void* const _self, const void* _other);
   void* (*plus)(const void* const _self, const void* _other);
   void* (*minus)(const void* const _self, const void* _other);
 } IArithmetic;
 
+void* zero(const void* _class);
 void* add(void* const _self, const void* _other);
 void* subtract(void* const _self, const void* _other);
 void* plus(const void* const _self, const void* _other);

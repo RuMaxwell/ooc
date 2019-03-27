@@ -34,6 +34,13 @@ static struct object_node * find_node(void * _object);
 //     }\
 //   }
 
+static const Class _any = {
+  .size = 0,
+  .description = "any",
+  NULL
+};
+const void* any;
+
 // Create a new instace.
 //// WILL throw an error if failed to allocate memory.
 void * new(const void * _Type, ...) {
@@ -161,6 +168,27 @@ void * to_string(const void * const _self) {
   return (*self)->to_string ? (*self)->to_string(_self) : def_to_string(_self);
 }
 
+
+////////////////////////////////
+/////// Optional methods ///////
+////////////////////////////////
+
+void * default_value(const void* _Type) {
+  const Class* Type = _Type;
+
+  if (!_Type)
+    error(ERR_NULLREF);
+  if (!(Type->default_value))
+    error(ERR_NOTIMPLEMENTED);
+
+  return Type->default_value();
+}
+
+
+/////////////////////////////////////
+//////// Useful Function Kits ///////
+/////////////////////////////////////
+
 // Returns whether an object is an instance of the given class.
 //// WILL throw an error when the first argument is NULL, or no class at the beginning of the object.
 int is_instance(const void * const _self, const void * _class) {
@@ -174,25 +202,41 @@ int is_instance(const void * const _self, const void * _class) {
 
 // Returns whether a class has implemented the given interface.
 //// WILL throw an error when the first argument is NULL.
-int implemented(const void * _class, const int interface) {
-  return get_interface(_class, interface) ? 1 : 0;
+void* get_interface_from_class(const void * _class, const int interface) {
+  const Class * class = _class;
+
+  if (!_class)
+    error(ERR_NULLREF);
+
+  const Interface * p = class->interfaces;
+  for (; p != NULL; p = p->next)
+    if (* (int *)(p->interface) == interface)
+      return p->interface;
+
+  return NULL;
 }
 
 // Returns the specific interface object when the class has implemented the given interface.
 //// WILL throw an error when the first argument is NULL.
-void * get_interface(const void * _class, const int interface) {
-  const Class * const * class = _class;
+void * get_interface(const void * _object, const int interface) {
+  const Class * const * obj = _object;
 
-  if (!_class || !(*class))
+  if (!_object || !(*obj))
     error(ERR_NULLREF);
 
-  const Interface * p = (*class)->interfaces;
-  for (; p != NULL; p = p->next) {
-    if (* (int *)(p->interface) == interface) {
+  const Interface * p = (*obj)->interfaces;
+  for (; p != NULL; p = p->next)
+    if (* (int *)(p->interface) == interface)
       return p->interface;
-    }
-  }
   return NULL;
+}
+
+int is_null(const void * _object) {
+  return _object == NULL;
+}
+
+const void * get_class(const void* _object) {
+  return *(Class**)_object;
 }
 
 

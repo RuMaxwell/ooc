@@ -20,10 +20,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define _THROWS // function that throws error (used at the end of a header function declaration)
-#define _NO_THROW // function that do not throw error (used at the end of a header function declaration)
-#define _CONST_METHOD // function that do not modify the first object pointer (used after a member function pointer)
-#define _PRIVATE_METHOD // function that only declared and defined in the source file but not visible in the header file
+#define _THROWS // function that throws error (used at the end of a header function declaration).
+#define _NO_THROW // function that do not throw error (used at the end of a header function declaration).
+#define _CONST_METHOD // function that do not modify the first object pointer (used after a member function pointer).
+#define _PRIVATE_METHOD // function that only declared and defined in the source file but not visible in the header file.
+#define _NO_NEED_IMPLEMENT // interface method that does not need the inherited class to implement (because it is implemented by another interface method).
 
 #define var void *
 
@@ -56,7 +57,14 @@ typedef struct Class {
   int (* differ)(const void * const _self, const void * _other) _CONST_METHOD;
   // Returns a string representation of the object.
   void * (* to_string)(const void * const _self) _CONST_METHOD;
+
+  //// Optional methods. These methods can be set `NULL` (or just don't set, this will be set NULL by the compiler (I haven't checked the standard, but GCC does)).
+  // Get the default value of this type.
+  void * (* default_value)();
 } Class;
+
+// Reference of type `any`. This class can not construct.
+extern const void* any;
 
 // Create a new instace.
 //// WILL throw an erjror if failed to allocate memory.
@@ -88,17 +96,31 @@ size_t size_of(const void * const _self) _THROWS;
 void * to_string(const void * const _self) _THROWS;
 
 
+//////// Optional methods ////////
+// Get the default value of the type.
+//// WILL throw an error when the type does not allow a default value.
+void * default_value(const void * _Type) _THROWS;
+
+
+//////// Useful function kits ////////
+
 // Returns whether an object is an instance of the given class.
 //// WILL throw an error when the first argument is NULL, or no class at the beginning of the object.
 int is_instance(const void * const _self, const void * _class) _THROWS;
 
 // Returns whether a class has implemented the given interface.
 //// WILL throw an error when the first argument is NULL.
-int implemented(const void * _class, const int interface) _THROWS;
+void* get_interface_from_class(const void * _class, const int interface) _THROWS;
 
-// Returns the specific interface object when the class has implemented the given interface.
+// Returns the specific interface structure object when the object's class has implemented the given interface.
 //// WILL throw an error when the first argument is NULL.
-void * get_interface(const void * _class, const int interface) _THROWS;
+void * get_interface(const void * _object, const int interface) _THROWS;
+
+// Check whether the object is `NULL`. Useful when you use this as an argument passed to a method.
+int is_null(const void * _object);
+
+// Get the object's type.
+const void * get_class(const void* _object);
 
 
 //////// Garbage Collection ////////

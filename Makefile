@@ -16,5 +16,5 @@ run:
 	./test
 
 clean:
-	rm ./*.o
-	rm ./test
+	-rm ./*.o
+	-rm ./test

@@ -111,3 +111,7 @@ void printcfg(struct print_config * config, ...) {
     delete(splitter); delete(ending);
   }
 }
+
+void printFormat(void * formatString, ...) {
+  error(ERR_NOTIMPLEMENTED);
+}

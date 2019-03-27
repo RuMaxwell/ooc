@@ -8,7 +8,7 @@
 
 #define I(x) new(integer, x)
 
-extern const void* integer; /* IArithmetic, IComparable */
+extern const void* integer; /* IArithmetic, IComparable, INumeric */
 
 int int_value(const void* const _self);
 void set_int(void* const _self, const int value);

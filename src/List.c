@@ -254,6 +254,33 @@ static void * List_ISequential_concat(const void * const _self, const void * _ot
   return res;
 }
 
+static void* List_IFunctor_map(const void* const _self, void* (*f)(const void*)) {
+  const List* const self = _self;
+  struct list_node* p = self->head;
+  List* lst = new(list);
+
+  for (; p != NULL; p = p->next)
+    push(lst, f(p->object));
+
+  return lst;
+}
+
+static void* List_IApplicative_apply(const void* const _self, const void* _other) {
+  const List* const self = _self;
+  const List* const other = _other;
+  struct list_node* p = self->head;
+  struct list_node* q = other->head;
+  List* lst = new(list);
+
+  for (; q != NULL; q = q->next)
+    for (p = self->head; p != NULL; p = p->next) {
+      void* (*f)(const void*) = q->object;
+      push(lst, f(p->object));
+    }
+
+  return lst;
+}
+
 static const ISequential _list_i_sequential = {
   .magic = I_SEQUENTIAL,
   .length = List_ISequential_length,
@@ -265,10 +292,26 @@ static const ISequential _list_i_sequential = {
   .drop = List_ISequence_drop,
   .append = List_ISequence_append,
 };
+static const IFunctor _list_i_functor = {
+  .magic = I_FUNCTOR,
+  .map = List_IFunctor_map
+};
+static const IApplicative _list_i_applicative = {
+  .magic = I_APPLICATIVE,
+  .apply = List_IApplicative_apply
+};
 
-static const Interface _list_interfaces = {
-  (void *)(& _list_i_sequential),
+static const Interface _list_interfaces_2 = {
+  (void*)(&_list_i_applicative),
   NULL
+};
+static const Interface _list_interfaces_1 = {
+  (void*)(&_list_i_functor),
+  (void*)(&_list_interfaces_2)
+};
+static const Interface _list_interfaces = {
+  (void*)(&_list_i_sequential),
+  (void*)(&_list_interfaces_1)
 };
 
 static const Class _list = {

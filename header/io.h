@@ -88,4 +88,9 @@ void fprintc(void * file, int count, ...);
  */
 void printcfg(struct print_config * config, ...);
 
+/*
+ * Print several objects in format given by the format string.
+ */
+void printFormat(void * formatString, ...);
+
 #endif

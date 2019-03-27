@@ -39,7 +39,15 @@ static void* Integer_to_string(const void* const _self) {
   return new(string, buffer);
 }
 
+static void* Integer_default_value() {
+  return new(integer, 0);
+}
+
 /* IArithmetic */
+static void* Integer_IArithmetic_zero() {
+  return new(integer, 0);
+}
+
 static void* Integer_IArithmetic_add(void* const _self, const void* _other) {
   Integer* const self = _self;
   const Integer* other = _other;
@@ -75,22 +83,54 @@ static int Integer_IComparable_compare(const void * const _self, const void * _o
   return differ(_self, _other);
 }
 
+/* INumeric */
+static void* Integer_INumeric_identity() {
+  return new(integer, 1);
+}
+
+static void* Integer_INumeric_multiply(void* const _self, const void* _other) {
+  Integer* const self = _self;
+  const Integer* other = _other;
+
+  self->value *= other->value;
+  return self;
+}
+
+static void* Integer_INumeric_times(const void* const _self, const void* _other) {
+  const Integer* const self = _self;
+  const Integer* other = _other;
+
+  void* i = new(integer, self->value * other->value);
+  return i;
+}
+
+
 static const IArithmetic _integer_i_arithmetic = {
   .magic = I_ARITHMETIC,
+  .zero = Integer_IArithmetic_zero,
   .add = Integer_IArithmetic_add,
   .subtract = Integer_IArithmetic_subtract,
   .plus = Integer_IArithmetic_plus,
   .minus = Integer_IArithmetic_minus
 };
-
 static const IComparable _integer_i_comparable = {
   .magic = I_COMPARABLE,
   .compare = Integer_IComparable_compare
 };
+static const INumeric _integer_i_numeric = {
+  .magic = I_NUMERIC,
+  .identity = Integer_INumeric_identity,
+  .multiply = Integer_INumeric_multiply,
+  .times = Integer_INumeric_times
+};
 
+static const Interface _integer_interfaces_2 = {
+  (void*)(&_integer_i_numeric),
+  NULL
+};
 static const Interface _integer_interfaces_1 = {
   (void*)(&_integer_i_comparable),
-  NULL
+  (void*)(&_integer_interfaces_2)
 };
 static const Interface _integer_interfaces = {
   (void*)(&_integer_i_arithmetic),
@@ -105,7 +145,9 @@ static const Class _integer = {
   .destructor = Integer_destructor,
   .clone = Integer_clone,
   .differ = Integer_differ,
-  .to_string = Integer_to_string
+  .to_string = Integer_to_string,
+
+  .default_value = Integer_default_value
 };
 
 const void* integer = &_integer;

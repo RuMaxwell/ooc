@@ -9,7 +9,7 @@
 #include "./interfaces.h"
 #include "./String.h"
 
-extern const void * list; /* ISequential */
+extern const void * list; /* IFunctor, IApplicative, ISequential */
 
 void * LIST(int count, ...);
 
